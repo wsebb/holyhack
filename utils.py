@@ -11,7 +11,13 @@ def get_dict():
     # Read each row in the file
     count = 0
     for row in reader:
-        d[count] = tuple(row)
+        review = dict()
+        review['review'] = row[1]
+        review['rating'] = row[2]
+        review['thumbs_up'] = row[3]
+        review['reply'] = row[4]
+
+        d[count] = review
         count += 1
     # Close the file
     f.close()
