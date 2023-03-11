@@ -11,6 +11,8 @@ def get_dict():
     # Read each row in the file
     count = 0
     for row in reader:
+        if None in row:
+            continue
         review = dict()
         review['review'] = row[1]
         review['rating'] = row[2]
@@ -21,7 +23,7 @@ def get_dict():
         count += 1
     # Close the file
     f.close()
-    # Print the set
+    # return the set
     return d
 
 
@@ -33,5 +35,3 @@ def get_dict_json():
         if isinstance(data, list):
             data = {i: d for i, d in enumerate(data)}
     return data
-
-

@@ -1,31 +1,27 @@
-import utils
-import nltk
+import os
+
 from nltk.corpus import stopwords
+import pandas as pd
+import nltk
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.cluster import KMeans
-import pandas as pd
-import time
+
+nltk.download('stopwords')
 
 
-def generate_cvs_cluster(amount_of_clusters):
-    start_time = time.time()
-
-    data = utils.get_dict()
+def generate_csv_cluster(data, amount_of_clusters):
     # create a list of all the reviews
-    reviews = [review['review'] for review in data.values()]
+    reviews = [f"{review['review']} &{review['rating']} &{review['score']} &{review['thumbs_up']}" for review in
+               data.values()]
 
-    nltk.download('stopwords')
-    # create the TF-IDF vectorizer
-    vectorizer = TfidfVectorizer(stop_words=stopwords.words('english'))
+    # create the TF-IDF vectorizer. Only use words that are longer than 2 characters and don't contain numbers.
+    vectorizer = TfidfVectorizer(stop_words=stopwords.words('english'), token_pattern=r"(?u)\b[^&^\d\W][^&^\d\W]+\b")
 
-    # fit the vectorizer on the reviews
+    # fit the vectorizer on the reviews and also save the scores
     vectors = vectorizer.fit_transform(reviews)
 
-    # get the feature names
-    features = vectorizer.get_feature_names_out()
-
     # create the KMeans model
-    model = KMeans(n_clusters=amount_of_clusters, init='k-means++', max_iter=100, n_init=1)
+    model = KMeans(n_clusters=amount_of_clusters, init='k-means++', n_init=1)
 
     # fit the model on the vectors
     model.fit(vectors)
@@ -34,43 +30,61 @@ def generate_cvs_cluster(amount_of_clusters):
     labels = model.labels_
 
     # create a new dataframe that includes the cluster assignments
-    df = pd.DataFrame({'cluster': labels, 'review': reviews})
+    df = pd.DataFrame(
+        {'cluster': labels, 'review': reviews, 'score': [float(review.rsplit("&", 3)[2].strip()) for review in reviews],
+         'rating': [float(review.rsplit("&", 3)[1].strip()) for review in reviews]})
 
-    # Make a text file for each cluster named cluster_1.txt, cluster_2.txt, etc. Each file should first contain the cluster number, the amount of reviews and then the reviews in that cluster.
+    if not os.path.exists('csv_clusters'):
+        os.makedirs('csv_clusters')
+    else:
+        for file in os.listdir('csv_clusters'):
+            os.remove(os.path.join('csv_clusters', file))
+    # Make a text file per cluster containing all the reviews and some data at the top
     for i in range(amount_of_clusters):
-        with open(f"cvs_clusters/cluster_{i}_{len(df[df['cluster'] == i])}.txt", "w") as my_file:
+        # Extract the data from the dataframe by first identifying the cluster
+        cluster_df = df[df['cluster'] == i]
+        num_reviews = len(cluster_df)
+        avg_rating = round(cluster_df['rating'].astype(float).mean(), 2)
+        summed_score = round(cluster_df['score'].sum(), 2)
+
+        # write this to a txt file
+        with open(f"csv_clusters/cluster_{summed_score}_{avg_rating}_avg_{num_reviews}_sum_{i}.txt", "w") as my_file:
             my_file.write(f"Cluster: {i}\n")
-            my_file.write(f"Amount of reviews: {len(df[df['cluster'] == i])}\n\n")
-            for review in df[df['cluster'] == i]['review']:
-                my_file.write(f"{review}\n\n")
+            my_file.write(f"Amount of reviews: {num_reviews}\n")
+            my_file.write(f"Average rating: {avg_rating}\n")
+            my_file.write(f"Summed score: {summed_score}\n\n")
 
-    # end the timer
-    print(f"--- %s seconds ---" % (time.time() - start_time))
-    # print some stats about the clusters
-    print(f"Amount of clusters: {amount_of_clusters}")
-    print(f"Amount of reviews: {len(df)}")
-    print(f"Average amount of reviews per cluster: {len(df) / amount_of_clusters}")
+            # create a list of tuples where each tuple contains the review text, rating, score, and likes as a string
+            reviews = [
+                (review.rsplit("&", 3)[0], review.rsplit("&", 3)[1].strip(), float(review.rsplit("&", 3)[2].strip()),
+                 review.rsplit("&", 1)[1].strip() if '&' in review else 'Error')
+                for review in cluster_df['review']]
+
+            # sort the list of tuples based on the score in descending order
+            reviews.sort(key=lambda x: x[2], reverse=True)
+
+            # loop through all the reviews in the sorted list of tuples and write them to the file
+            for review in reviews:
+                # write the review, rating, score, and likes to the file
+                my_file.write(f"{review[0]}\n")
+                my_file.write(f"Rating: {review[1]}\n")
+                my_file.write(f"Score: {review[2]}\n")
+                my_file.write(f"Likes: {review[3]}\n\n")
 
 
-def generate_json_cluster(amount_of_clusters):
-    start_time = time.time()
-
-    data = utils.get_dict_json()
+def generate_json_cluster(data, amount_of_clusters):
     # create a list of all the reviews
-    reviews = [review['opinion'] for review in data.values()]
+    reviews = [f"{review['opinion']} &{review['score']} &{review['rating']}" for review in
+               data.values()]
 
-    nltk.download('stopwords')
-    # create the TF-IDF vectorizer
-    vectorizer = TfidfVectorizer(stop_words=stopwords.words('dutch'))
+    # create the TF-IDF vectorizer. Only use words that are longer than 2 characters and don't contain numbers.
+    vectorizer = TfidfVectorizer(stop_words=stopwords.words('dutch'), token_pattern=r"(?u)\b[^&^\d\W][^&^\d\W]+\b")
 
-    # fit the vectorizer on the reviews
+    # fit the vectorizer on the reviews and also save the scores
     vectors = vectorizer.fit_transform(reviews)
 
-    # get the feature names
-    features = vectorizer.get_feature_names_out()
-
     # create the KMeans model
-    model = KMeans(n_clusters=amount_of_clusters, init='k-means++', max_iter=100, n_init=1)
+    model = KMeans(n_clusters=amount_of_clusters, init='k-means++', n_init=1)
 
     # fit the model on the vectors
     model.fit(vectors)
@@ -79,23 +93,41 @@ def generate_json_cluster(amount_of_clusters):
     labels = model.labels_
 
     # create a new dataframe that includes the cluster assignments
-    df = pd.DataFrame({'cluster': labels, 'review': reviews})
+    df = pd.DataFrame(
+        {'cluster': labels, 'review': reviews, 'score': [float(review.rsplit("&", 2)[1].strip()) for review in reviews],
+         'rating': [float(review.rsplit("&", 2)[2].strip()) for review in reviews]})
 
-    # Make a text file for each cluster named cluster_1.txt, cluster_2.txt, etc. Each file should first contain the cluster number, the amount of reviews and then the reviews in that cluster.
+    if not os.path.exists('json_clusters'):
+        os.makedirs('json_clusters')
+    else:
+        for file in os.listdir('json_clusters'):
+            os.remove(os.path.join('json_clusters', file))
+    # Make a text file per cluster containing all the reviews and some data at the top
     for i in range(amount_of_clusters):
-        with open(f"json_clusters/cluster_{i}_{len(df[df['cluster'] == i])}.txt", "w") as my_file:
+        # Extract the data from the dataframe by first identifying the cluster
+        cluster_df = df[df['cluster'] == i]
+        num_reviews = len(cluster_df)
+        avg_rating = round(cluster_df['score'].astype(float).mean(), 2)
+        summed_score = round(cluster_df['rating'].sum(), 2)
+
+        # write this to a txt file
+        with open(f"json_clusters/cluster_{summed_score}_{avg_rating}_avg_{num_reviews}_sum_{i}.txt", "w") as my_file:
             my_file.write(f"Cluster: {i}\n")
-            my_file.write(f"Amount of reviews: {len(df[df['cluster'] == i])}\n\n")
-            for review in df[df['cluster'] == i]['review']:
-                my_file.write(f"{review}\n\n")
-    # end the timer
-    print(f"--- %s seconds ---" % (time.time() - start_time))
-    # print some stats about the clusters
-    print(f"Amount of clusters: {amount_of_clusters}")
-    print(f"Amount of reviews: {len(df)}")
-    print(f"Average amount of reviews per cluster: {len(df) / amount_of_clusters}")
+            my_file.write(f"Amount of reviews: {num_reviews}\n")
+            my_file.write(f"Average rating: {avg_rating}\n")
+            my_file.write(f"Summed score: {summed_score}\n\n")
 
+            # create a list of tuples where each tuple contains the review text, rating, and score as a string
+            reviews = [
+                (review.rsplit("&", 2)[0], review.rsplit("&", 2)[2].strip(), float(review.rsplit("&", 2)[1].strip()))
+                for review in cluster_df['review']]
 
-if __name__ == '__main__':
-    # generate_cvs_cluster()
-    generate_json_cluster(100)
+            # sort the list of tuples based on the score
+            reviews.sort(key=lambda x: x[2], reverse=True)
+
+            # loop through all the reviews in the sorted list of tuples and write them to the file
+            for review in reviews:
+                # write the review, rating, and score to the file
+                my_file.write(f"{review[0]}\n")
+                my_file.write(f"Rating: {review[2]}\n")
+                my_file.write(f"Score: {review[1]}\n\n")
