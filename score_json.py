@@ -78,6 +78,6 @@ def read_file(file_name):
         return [line.rstrip('\n') for line in my_file]
 
 
-def generate_scores_json(dict_cvs):
-    for review in dict_cvs:
-        optimisation_func(dict_cvs[review])
+def generate_scores_json(dict_csv):
+    for review in dict_csv:
+        optimisation_func(dict_csv[review])

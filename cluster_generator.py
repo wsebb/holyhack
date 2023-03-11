@@ -1,3 +1,5 @@
+import os
+
 from nltk.corpus import stopwords
 import pandas as pd
 import nltk
@@ -7,7 +9,7 @@ from sklearn.cluster import KMeans
 nltk.download('stopwords')
 
 
-def generate_cvs_cluster(data, amount_of_clusters):
+def generate_csv_cluster(data, amount_of_clusters):
     # create a list of all the reviews
     reviews = [f"{review['review']} &{review['rating']} &{review['score']} &{review['thumbs_up']}" for review in
                data.values()]
@@ -32,6 +34,11 @@ def generate_cvs_cluster(data, amount_of_clusters):
         {'cluster': labels, 'review': reviews, 'score': [float(review.rsplit("&", 3)[2].strip()) for review in reviews],
          'rating': [float(review.rsplit("&", 3)[1].strip()) for review in reviews]})
 
+    if not os.path.exists('csv_clusters'):
+        os.makedirs('csv_clusters')
+    else:
+        for file in os.listdir('csv_clusters'):
+            os.remove(os.path.join('csv_clusters', file))
     # Make a text file per cluster containing all the reviews and some data at the top
     for i in range(amount_of_clusters):
         # Extract the data from the dataframe by first identifying the cluster
@@ -39,8 +46,9 @@ def generate_cvs_cluster(data, amount_of_clusters):
         num_reviews = len(cluster_df)
         avg_rating = round(cluster_df['rating'].astype(float).mean(), 2)
         summed_score = round(cluster_df['score'].sum(), 2)
+
         # write this to a txt file
-        with open(f"cvs_clusters/cluster_{summed_score}_{avg_rating}_avg_{num_reviews}_sum_{i}.txt", "w") as my_file:
+        with open(f"csv_clusters/cluster_{summed_score}_{avg_rating}_avg_{num_reviews}_sum_{i}.txt", "w") as my_file:
             my_file.write(f"Cluster: {i}\n")
             my_file.write(f"Amount of reviews: {num_reviews}\n")
             my_file.write(f"Average rating: {avg_rating}\n")
@@ -89,6 +97,11 @@ def generate_json_cluster(data, amount_of_clusters):
         {'cluster': labels, 'review': reviews, 'score': [float(review.rsplit("&", 2)[1].strip()) for review in reviews],
          'rating': [float(review.rsplit("&", 2)[2].strip()) for review in reviews]})
 
+    if not os.path.exists('json_clusters'):
+        os.makedirs('json_clusters')
+    else:
+        for file in os.listdir('json_clusters'):
+            os.remove(os.path.join('json_clusters', file))
     # Make a text file per cluster containing all the reviews and some data at the top
     for i in range(amount_of_clusters):
         # Extract the data from the dataframe by first identifying the cluster
@@ -96,6 +109,7 @@ def generate_json_cluster(data, amount_of_clusters):
         num_reviews = len(cluster_df)
         avg_rating = round(cluster_df['score'].astype(float).mean(), 2)
         summed_score = round(cluster_df['rating'].sum(), 2)
+
         # write this to a txt file
         with open(f"json_clusters/cluster_{summed_score}_{avg_rating}_avg_{num_reviews}_sum_{i}.txt", "w") as my_file:
             my_file.write(f"Cluster: {i}\n")
