@@ -1,6 +1,7 @@
 import utils
+import os
 
-dict_reviews = utils.get_dict()
+
 
 
 def optimisationfunc(review):
@@ -8,6 +9,7 @@ def optimisationfunc(review):
     review_text = get_review_text(review)
 
     #criteria
+
     likes = review['thumbs_up']
     premium = get_premium(review_text)
     trial = get_trial(review_text)
@@ -16,17 +18,17 @@ def optimisationfunc(review):
     aantal_scheldwoorden = get_aantal_scheldwoorden(review_text)
 
     #weights
-    value = 1 * likes + 1 * aantal_woorden - 1 * aantal_scheldwoorden
+    value = 1 * int(likes) + 1 * aantal_woorden - 1 * aantal_scheldwoorden
     if premium or trial or subscription:
         value += 1
-    return value
+    review["score"] = value
 
 def get_review_text(dict_reviews):
     return dict_reviews['review']
 
 def get_premium(review_text):
     woorden = review_text.split()
-    list_of_premium = read_file('premium.txt')
+    list_of_premium = read_file("/premium.txt")
 
 
     for i in range(len(woorden)):
@@ -37,7 +39,7 @@ def get_premium(review_text):
 
 def get_trial(review_text):
     woorden = review_text.split()
-    list_of_trial = read_file('trial.txt')
+    list_of_trial = read_file('/trial.txt')
     for i in range(len(woorden)):
         for j in range(len(list_of_trial)):
             if list_of_trial[j] == woorden[i]:
@@ -46,7 +48,7 @@ def get_trial(review_text):
 
 def get_subscription(review_text):
     woorden = review_text.split()
-    list_of_subscription = read_file('subscription.txt')
+    list_of_subscription = read_file('/subscription.txt')
     for i in range(len(woorden)):
         for j in range(len(list_of_subscription)):
             if list_of_subscription[j] == woorden[i]:
@@ -59,7 +61,7 @@ def get_aantal_woorden(review_text):
 
 def get_aantal_scheldwoorden(review_text):
     woorden = review_text.split()
-    list_of_scheldwoorden = read_file('badwords.txt')
+    list_of_scheldwoorden = read_file('/badwords.txt')
     aantal = 0
     for i in range(len(woorden)):
         for j in range(len(list_of_scheldwoorden)):
@@ -68,10 +70,18 @@ def get_aantal_scheldwoorden(review_text):
     return aantal
 
 def read_file(file_name):
-    with open(file_name, "r") as my_file:
+
+    path = os.getcwd() + file_name
+    with open(path, "r") as my_file:
         return [line.rstrip('\n') for line in my_file]
 
 
+def generate_scores(dict_cvs):
+    for review in dict_cvs:
+        if review == 0:
+            print("OK")
+        else:
+            optimisationfunc(dict_cvs[review])
 
-for review in dict_reviews:
-    print(optimisationfunc(review))
+
+
