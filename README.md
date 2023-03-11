@@ -5,5 +5,9 @@
 number of clusters to be used in the analysis.
 4. Clusters are saved into directories `csv_clusters/` and `json_clusters/`
 
+## How to open the dashboard
+1. Go to `website/html`.
+2. open `index.html`.
+
 ## Hardcoded
 Nothing is Hardcoded
