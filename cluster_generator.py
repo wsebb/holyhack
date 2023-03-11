@@ -7,10 +7,9 @@ import pandas as pd
 import time
 
 
-def generate_cvs_cluster(amount_of_clusters):
+def generate_cvs_cluster(data, amount_of_clusters):
     start_time = time.time()
 
-    data = utils.get_dict()
     # create a list of all the reviews
     reviews = [review['review'] for review in data.values()]
 
@@ -23,6 +22,7 @@ def generate_cvs_cluster(amount_of_clusters):
 
     # get the feature names
     features = vectorizer.get_feature_names_out()
+
 
     # create the KMeans model
     model = KMeans(n_clusters=amount_of_clusters, init='k-means++', max_iter=100, n_init=1)
@@ -43,6 +43,8 @@ def generate_cvs_cluster(amount_of_clusters):
             my_file.write(f"Amount of reviews: {len(df[df['cluster'] == i])}\n\n")
             for review in df[df['cluster'] == i]['review']:
                 my_file.write(f"{review}\n\n")
+                print(f"Score: {data[review]}\n\n")
+                my_file.write(f"Score: {data[review]['score']}\n\n")
 
     # end the timer
     print(f"--- %s seconds ---" % (time.time() - start_time))
@@ -99,3 +101,4 @@ def generate_json_cluster(amount_of_clusters):
 if __name__ == '__main__':
     # generate_cvs_cluster()
     generate_json_cluster(100)
+

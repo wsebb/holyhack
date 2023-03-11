@@ -33,5 +33,3 @@ def get_dict_json():
         if isinstance(data, list):
             data = {i: d for i, d in enumerate(data)}
     return data
-
-
