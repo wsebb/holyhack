@@ -78,10 +78,15 @@ def read_file(file_name):
 
 def generate_scores(dict_cvs):
     for review in dict_cvs:
-        if review == 0:
-            print("OK")
-        else:
-            optimisationfunc(dict_cvs[review])
+        optimisationfunc(dict_cvs[review])
 
+dicti = utils.get_dict()
+generate_scores(dicti)
+
+with open("reviews_scores.txt", "w",encoding="utf8") as my_file:
+
+    for review in dicti.values():
+        print(review)
+        my_file.write(f"Review: {review['review']}\nScore: {review['score']}\nDuimpjes: {review['thumbs_up']}\n\n")
 
 

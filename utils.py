@@ -34,6 +34,4 @@ def get_dict_json():
             data = {i: d for i, d in enumerate(data)}
     return data
 
-print(get_dict_json())
-print(len(get_dict_json()))
-print(type(get_dict_json()))
+
