@@ -1,7 +1,7 @@
 import utils
 
 dict_reviews = utils.get_dict()
-print(dict_reviews)
+
 
 def optimisationfunc(review):
     value = 0
@@ -26,7 +26,9 @@ def get_review_text(dict_reviews):
 
 def get_premium(review_text):
     woorden = review_text.split()
-    list_of_premium = []
+    list_of_premium = read_file('premium.txt')
+
+
     for i in range(len(woorden)):
         for j in range(len(list_of_premium)):
             if list_of_premium[j] == woorden[i]:
@@ -35,7 +37,7 @@ def get_premium(review_text):
 
 def get_trial(review_text):
     woorden = review_text.split()
-    list_of_trial = []
+    list_of_trial = read_file('trial.txt')
     for i in range(len(woorden)):
         for j in range(len(list_of_trial)):
             if list_of_trial[j] == woorden[i]:
@@ -44,7 +46,7 @@ def get_trial(review_text):
 
 def get_subscription(review_text):
     woorden = review_text.split()
-    list_of_subscription = []
+    list_of_subscription = read_file('subscription.txt')
     for i in range(len(woorden)):
         for j in range(len(list_of_subscription)):
             if list_of_subscription[j] == woorden[i]:
@@ -57,10 +59,19 @@ def get_aantal_woorden(review_text):
 
 def get_aantal_scheldwoorden(review_text):
     woorden = review_text.split()
-    list_of_scheldwoorden = []
+    list_of_scheldwoorden = read_file('badwords.txt')
     aantal = 0
     for i in range(len(woorden)):
         for j in range(len(list_of_scheldwoorden)):
             if list_of_scheldwoorden[j] == woorden[i]:
                 aantal += 1
     return aantal
+
+def read_file(file_name):
+    with open(file_name, "r") as my_file:
+        return [line.rstrip('\n') for line in my_file]
+
+
+
+for review in dict_reviews:
+    print(optimisationfunc(review))

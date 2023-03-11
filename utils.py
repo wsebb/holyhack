@@ -24,11 +24,16 @@ def get_dict():
     # Print the set
     return d
 
+
 def get_dict_json():
     # read a json file and make a dictionary from it
     import json
     with open('reviews_pakket.json', encoding="utf8") as f:
         data = json.load(f)
+        if isinstance(data, list):
+            data = {i: d for i, d in enumerate(data)}
     return data
 
+print(get_dict_json())
 print(len(get_dict_json()))
+print(type(get_dict_json()))
