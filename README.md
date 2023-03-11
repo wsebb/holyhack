@@ -1,4 +1,4 @@
-# NLP Impact
+# NLP Impact - fsc4j
 ## How to use:
 1. Clone the repository
 2. Run `run_analyser.py`. This file can be called with parameter `clusters`, default is 1000. This parameter defines the 
