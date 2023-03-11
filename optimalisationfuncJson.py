@@ -1,7 +1,7 @@
 import utils
 import os
 import numpy as np
-
+import csv
 
 
 def optimisationfunc(review):
@@ -10,7 +10,6 @@ def optimisationfunc(review):
 
     #criteria
 
-    likes = review['thumbs_up']
     premium = get_premium(review_text)
     trial = get_trial(review_text)
     subscription = get_subscription(review_text)
@@ -18,13 +17,13 @@ def optimisationfunc(review):
     aantal_scheldwoorden = get_aantal_scheldwoorden(review_text)
 
     #weights
-    value = 1 * np.log(1 + int(likes)) + 1 * np.log(1 + aantal_woorden) - 1 * np.log(1 + aantal_scheldwoorden) #logarithmic scale
+    value = 1 * np.log(1 + aantal_woorden) - 1 * np.log(1 + aantal_scheldwoorden) #logarithmic scale
     if premium or trial or subscription:
         value += 1.5
-    review["score"] = round(value, 2)
+    review["rating"] = round(value, 2)
 
 def get_review_text(dict_reviews):
-    return dict_reviews['review']
+    return dict_reviews['opinion']
 
 def get_premium(review_text):
     woorden = review_text.split()
@@ -76,17 +75,6 @@ def read_file(file_name):
         return [line.rstrip('\n') for line in my_file]
 
 
-def generate_scores(dict_cvs):
+def generate_scores_json(dict_cvs):
     for review in dict_cvs:
         optimisationfunc(dict_cvs[review])
-
-dicti = utils.get_dict()
-generate_scores(dicti)
-
-with open("reviews_scores.txt", "w",encoding="utf8") as my_file:
-
-    for review in dicti.values():
-        print(review)
-        my_file.write(f"Review: {review['review']}\nScore: {review['score']}\nDuimpjes: {review['thumbs_up']}\n\n")
-
-
