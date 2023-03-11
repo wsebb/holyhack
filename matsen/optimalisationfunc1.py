@@ -20,8 +20,8 @@ def optimisationfunc(review):
     #weights
     value = 1 * np.log(1 + int(likes)) + 1 * np.log(1 + aantal_woorden) - 1 * np.log(1 + aantal_scheldwoorden) #logarithmic scale
     if premium or trial or subscription:
-        value += 7
-    review["score"] = value
+        value += 1.5
+    review["score"] = round(value, 2)
 
 def get_review_text(dict_reviews):
     return dict_reviews['review']
