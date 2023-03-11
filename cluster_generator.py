@@ -1,7 +1,5 @@
-import utils
 from nltk.corpus import stopwords
 import pandas as pd
-import time
 import nltk
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.cluster import KMeans
@@ -14,7 +12,7 @@ def generate_cvs_cluster(data, amount_of_clusters):
     reviews = [f"{review['review']} &{review['rating']} &{review['score']} &{review['thumbs_up']}" for review in
                data.values()]
 
-    # create the TF-IDF vectorizer
+    # create the TF-IDF vectorizer. Only use words that are longer than 2 characters and don't contain numbers.
     vectorizer = TfidfVectorizer(stop_words=stopwords.words('english'), token_pattern=r"(?u)\b[^&^\d\W][^&^\d\W]+\b")
 
     # fit the vectorizer on the reviews and also save the scores
@@ -36,6 +34,7 @@ def generate_cvs_cluster(data, amount_of_clusters):
 
     # Make a text file per cluster containing all the reviews and some data at the top
     for i in range(amount_of_clusters):
+        # Extract the data from the dataframe by first identifying the cluster
         cluster_df = df[df['cluster'] == i]
         num_reviews = len(cluster_df)
         avg_rating = round(cluster_df['rating'].astype(float).mean(), 2)
@@ -53,7 +52,7 @@ def generate_cvs_cluster(data, amount_of_clusters):
                  review.rsplit("&", 1)[1].strip() if '&' in review else 'Error')
                 for review in cluster_df['review']]
 
-            # sort the list of tuples based on the score
+            # sort the list of tuples based on the score in descending order
             reviews.sort(key=lambda x: x[2], reverse=True)
 
             # loop through all the reviews in the sorted list of tuples and write them to the file
@@ -70,7 +69,7 @@ def generate_json_cluster(data, amount_of_clusters):
     reviews = [f"{review['opinion']} &{review['score']} &{review['rating']}" for review in
                data.values()]
 
-    # create the TF-IDF vectorizer
+    # create the TF-IDF vectorizer. Only use words that are longer than 2 characters and don't contain numbers.
     vectorizer = TfidfVectorizer(stop_words=stopwords.words('dutch'), token_pattern=r"(?u)\b[^&^\d\W][^&^\d\W]+\b")
 
     # fit the vectorizer on the reviews and also save the scores
@@ -92,6 +91,7 @@ def generate_json_cluster(data, amount_of_clusters):
 
     # Make a text file per cluster containing all the reviews and some data at the top
     for i in range(amount_of_clusters):
+        # Extract the data from the dataframe by first identifying the cluster
         cluster_df = df[df['cluster'] == i]
         num_reviews = len(cluster_df)
         avg_rating = round(cluster_df['score'].astype(float).mean(), 2)

@@ -5,7 +5,7 @@ d = utils.get_dict()
 
 
 def get_replies():
-    with open("replies.txt", "w") as my_file:
+    with open("spelling/replies.txt", "w") as my_file:
         for review in d.values():
             if review['reply']:
                 reply = f"Review: {review['review']}\nReply: {review['reply']}\n\n"

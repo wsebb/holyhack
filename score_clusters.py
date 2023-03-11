@@ -2,15 +2,17 @@ import time
 
 import cluster_generator
 import utils
-import optimalisationfunc1 as op
-import optimalisationfuncJson as opj
+import score_csv as op
+import score_json as opj
 
 
 def generate_scores_cluster_csv():
-    # Runt in ongeveer 0 + 50 + 60 = 110 seconden
+    # Generates clusters for the json data file
+    # Runs (avg) 0s + 50s + 60s = 110 seconds
     start_time = time.time()
     print("Generating datastruct for cvs...")
     dict_cvs = utils.get_dict()
+    dict_cvs = {k: dict_cvs[k] for k in list(dict_cvs)[:2000]}
     print(f"--- %s seconds ---" % (time.time() - start_time))
     start_time = time.time()
     print("Generating scores for reviews...")
@@ -18,16 +20,18 @@ def generate_scores_cluster_csv():
     print(f"--- %s seconds ---" % (time.time() - start_time))
     start_time = time.time()
     print("Generating clusters...")
-    cluster_generator.generate_cvs_cluster(dict_cvs, 1000)
+    cluster_generator.generate_cvs_cluster(dict_cvs, 10)
     print(f"--- %s seconds ---" % (time.time() - start_time))
     print("Done!")
 
+
 def generate_scores_cluster_json():
-    # Runt in ongeveer 1.5 + 311 +  = seconden
+    # Generates clusters for the json data file
+    # Runs (avg) 1s + 300s + 2500s = 2801 seconds
     start_time = time.time()
     print("Generating datastruct for json...")
     dict_json = utils.get_dict_json()
-    # dict_json = {k: dict_json[k] for k in list(dict_json)[:200000]}
+    dict_json = {k: dict_json[k] for k in list(dict_json)[:2000]}
     print(f"--- %s seconds ---" % (time.time() - start_time))
     start_time = time.time()
     print("Generating scores for reviews...")
@@ -35,11 +39,11 @@ def generate_scores_cluster_json():
     print(f"--- %s seconds ---" % (time.time() - start_time))
     start_time = time.time()
     print("Generating clusters...")
-    cluster_generator.generate_json_cluster(dict_json, 2000)
+    cluster_generator.generate_json_cluster(dict_json, 10)
     print(f"--- %s seconds ---" % (time.time() - start_time))
     print("Done!")
 
 
 if __name__ == '__main__':
-    # generate_scores_cluster_csv()
+    generate_scores_cluster_csv()
     generate_scores_cluster_json()
