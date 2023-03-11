@@ -18,7 +18,7 @@ def optimisationfunc(review):
     aantal_scheldwoorden = get_aantal_scheldwoorden(review_text)
 
     #weights
-    value = 1 * np.log(int(likes)) + 1 * np.log(aantal_woorden) - 1 * np.log(aantal_scheldwoorden) #logarithmic scale
+    value = 1 * np.log(1 + int(likes)) + 1 * np.log(1 + aantal_woorden) - 1 * np.log(1 + aantal_scheldwoorden) #logarithmic scale
     if premium or trial or subscription:
         value += 7
     review["score"] = value
